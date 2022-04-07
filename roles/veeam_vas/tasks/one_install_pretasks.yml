@@ -13,7 +13,7 @@
     password_never_expires: yes
     state: present
     groups:
-      - Administrators
+      - Administratoren
   when:
     - one_create_service_account | bool
     - one_username.find("\\") == -1 #skips account creation if domain account is specified
