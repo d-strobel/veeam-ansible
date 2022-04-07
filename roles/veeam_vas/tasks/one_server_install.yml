@@ -24,7 +24,7 @@
       - "SQL Database: {{ sql_database }}"
       - "SQL Service Account: {{ sql_service_username | default('not specified') }}"
       - "Veeam ONE Service Account: {{ one_username }}"
-      - "Veeam ONE SQL Account: {{ one_username }}"
+      - "Veeam ONE SQL Account: {{ sql_username }}"
       - "Veeam ONE Installation Type: {{ one_installation_type }}"
 - name: Copy license file
   ansible.windows.win_copy:
@@ -67,8 +67,8 @@
   become_flags: logon_type=batch
   vars:
     ansible_become_method: runas
-    ansible_become_user: "{{ one_username }}"
-    ansible_become_pass: "{{ one_password }}"
+    ansible_become_user: "{{ sql_username }}"
+    ansible_become_pass: "{{ sql_password }}"
   when:
     - sql_express_setup | bool
     - not (service.exists | bool)
@@ -79,14 +79,14 @@
   ansible.windows.win_package:
     path: "{{ source }}Monitor\\VeeamONE.Monitor.Server.x64.msi"
     state: present
-    arguments: '/L*v "{{ destination }}logs\VeeamONE.Monitor.Server.x64.log" EDITLICFILEPATH="{{ destination }}{{ destination_license_file }}" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VM_MN_SERVICEACCOUNT="{{ one_username }}" VM_MN_SERVICEPASSWORD="{{ one_password }}" VM_MN_SQL_SERVER="{{ sql_instance }}" VM_MN_SQL_DATABASE="{{ sql_database }}" VM_MN_SQL_AUTHENTICATION=0 VM_MN_SQL_USER="{{ one_username }}" VM_MN_SQL_PASSWORD="{{ one_password }}" VM_BACKUP_ADD_LATER=1 VM_VC_SELECTED_TYPE=2 VO_INSTALLATION_TYPE="{{ one_installation_type }}"'
+    arguments: '/L*v "{{ destination }}logs\VeeamONE.Monitor.Server.x64.log" EDITLICFILEPATH="{{ destination }}{{ destination_license_file }}" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VM_MN_SERVICEACCOUNT="{{ one_username }}" VM_MN_SERVICEPASSWORD="{{ one_password }}" VM_MN_SQL_SERVER="{{ sql_instance }}" VM_MN_SQL_DATABASE="{{ sql_database }}" VM_MN_SQL_AUTHENTICATION=1 VM_MN_SQL_USER="{{ sql_username }}" VM_MN_SQL_PASSWORD="{{ sql_password }}" VM_BACKUP_ADD_LATER=1 VM_VC_SELECTED_TYPE=2 VO_INSTALLATION_TYPE="{{ one_installation_type }}"'
   when: license | bool
   register: monitor_server
 - name: Install ONE Monitor Server without license file
   ansible.windows.win_package:
     path: "{{ source }}Monitor\\VeeamONE.Monitor.Server.x64.msi"
     state: present
-    arguments: '/L*v "{{ destination }}logs\VeeamONE.Monitor.Server.x64.log" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VM_MN_SERVICEACCOUNT="{{ one_username }}" VM_MN_SERVICEPASSWORD="{{ one_password }}" VM_MN_SQL_SERVER="{{ sql_instance }}" VM_MN_SQL_DATABASE="{{ sql_database }}" VM_MN_SQL_AUTHENTICATION=0 VM_MN_SQL_USER="{{ one_username }}" VM_MN_SQL_PASSWORD="{{ one_password }}" VM_BACKUP_ADD_LATER=1 VM_VC_SELECTED_TYPE=2 VO_INSTALLATION_TYPE="{{ one_installation_type }}"'
+    arguments: '/L*v "{{ destination }}logs\VeeamONE.Monitor.Server.x64.log" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VM_MN_SERVICEACCOUNT="{{ one_username }}" VM_MN_SERVICEPASSWORD="{{ one_password }}" VM_MN_SQL_SERVER="{{ sql_instance }}" VM_MN_SQL_DATABASE="{{ sql_database }}" VM_MN_SQL_AUTHENTICATION=1 VM_MN_SQL_USER="{{ sql_username }}" VM_MN_SQL_PASSWORD="{{ sql_password }}" VM_BACKUP_ADD_LATER=1 VM_VC_SELECTED_TYPE=2 VO_INSTALLATION_TYPE="{{ one_installation_type }}"'
   when: not (license | bool)
   register: monitor_server
 ## ONE Reporter Server
@@ -94,7 +94,7 @@
   ansible.windows.win_package:
     path: "{{ source }}Reporter\\VeeamONE.Reporter.Server.x64.msi"
     state: present
-    arguments: '/L*v "{{ destination }}logs\VeeamONE.Reporter.Server.x64.log" EDITLICFILEPATH="{{ destination }}{{ destination_license_file }}" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VM_RP_SERVICEACCOUNT="{{ one_username }}" VM_RP_SERVICEPASSWORD="{{ one_password }}" VM_RP_SQL_SERVER="{{ sql_instance }}" VM_RP_SQL_DATABASE="{{ sql_database }}" VM_RP_SQL_AUTHENTICATION=0 VM_RP_SQL_USER="{{ one_username }}" VM_RP_SQL_PASSWORD="{{ one_password }}" VM_BACKUP_ADD_LATER=1 VM_VC_SELECTED_TYPE=2 VO_INSTALLATION_TYPE="{{ one_installation_type }}"'
+    arguments: '/L*v "{{ destination }}logs\VeeamONE.Reporter.Server.x64.log" EDITLICFILEPATH="{{ destination }}{{ destination_license_file }}" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VM_RP_SERVICEACCOUNT="{{ one_username }}" VM_RP_SERVICEPASSWORD="{{ one_password }}" VM_RP_SQL_SERVER="{{ sql_instance }}" VM_RP_SQL_DATABASE="{{ sql_database }}" VM_RP_SQL_AUTHENTICATION=1 VM_RP_SQL_USER="{{ sql_username }}" VM_RP_SQL_PASSWORD="{{ sql_password }}" VM_BACKUP_ADD_LATER=1 VM_VC_SELECTED_TYPE=2 VO_INSTALLATION_TYPE="{{ one_installation_type }}"'
   when:
     - license | bool
     - version | int < 11
@@ -103,7 +103,7 @@
   ansible.windows.win_package:
     path: "{{ source }}Reporter\\VeeamONE.Reporter.Server.x64.msi"
     state: present
-    arguments: '/L*v "{{ destination }}logs\VeeamONE.Reporter.Server.x64.log" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VM_RP_SERVICEACCOUNT="{{ one_username }}" VM_RP_SERVICEPASSWORD="{{ one_password }}" VM_RP_SQL_SERVER="{{ sql_instance }}" VM_RP_SQL_DATABASE="{{ sql_database }}" VM_RP_SQL_AUTHENTICATION=0 VM_RP_SQL_USER="{{ one_username }}" VM_RP_SQL_PASSWORD="{{ one_password }}" VM_BACKUP_ADD_LATER=1 VM_VC_SELECTED_TYPE=2 VO_INSTALLATION_TYPE="{{ one_installation_type }}"'
+    arguments: '/L*v "{{ destination }}logs\VeeamONE.Reporter.Server.x64.log" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VM_RP_SERVICEACCOUNT="{{ one_username }}" VM_RP_SERVICEPASSWORD="{{ one_password }}" VM_RP_SQL_SERVER="{{ sql_instance }}" VM_RP_SQL_DATABASE="{{ sql_database }}" VM_RP_SQL_AUTHENTICATION=1 VM_RP_SQL_USER="{{ sql_username }}" VM_RP_SQL_PASSWORD="{{ sql_password }}" VM_BACKUP_ADD_LATER=1 VM_VC_SELECTED_TYPE=2 VO_INSTALLATION_TYPE="{{ one_installation_type }}"'
   when:
     - not (license | bool)
     - version | int < 11
@@ -112,7 +112,7 @@
   ansible.windows.win_package:
     path: "{{ source }}Reporter\\VeeamONE.Reporter.Server.x64.msi"
     state: present
-    arguments: '/L*v "{{ destination }}logs\VeeamONE.Reporter.Server.x64.log" EDITLICFILEPATH="{{ destination }}{{ destination_license_file }}" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VO_REPORTER_SERVICE_ACCOUNT_NAME="{{ one_username }}" VO_REPORTER_SERVICE_ACCOUNT_PASSWORD="{{ one_password }}" VO_REPORTER_SQL_SERVER_NAME="{{ sql_instance }}" VO_REPORTER_DATABASE_NAME="{{ sql_database }}" VO_REPORTER_AUTHENTICATION_TYPE_NAME=0 VO_REPORTER_SQL_USER_NAME="{{ one_username }}" VO_REPORTER_SQL_PASSWORD="{{ one_password }}" VO_INSTALLATION_TYPE="{{ one_installation_type }}"'
+    arguments: '/L*v "{{ destination }}logs\VeeamONE.Reporter.Server.x64.log" EDITLICFILEPATH="{{ destination }}{{ destination_license_file }}" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VO_REPORTER_SERVICE_ACCOUNT_NAME="{{ one_username }}" VO_REPORTER_SERVICE_ACCOUNT_PASSWORD="{{ one_password }}" VO_REPORTER_SQL_SERVER_NAME="{{ sql_instance }}" VO_REPORTER_DATABASE_NAME="{{ sql_database }}" VO_REPORTER_AUTHENTICATION_TYPE_NAME=0 VO_REPORTER_SQL_USER_NAME="{{ sql_username }}" VO_REPORTER_SQL_PASSWORD="{{ sql_password }}" VO_INSTALLATION_TYPE="{{ one_installation_type }}"'
   become: yes
   become_flags: logon_type=batch
   vars:
@@ -127,7 +127,7 @@
   ansible.windows.win_package:
     path: "{{ source }}Reporter\\VeeamONE.Reporter.Server.x64.msi"
     state: present
-    arguments: '/L*v "{{ destination }}logs\VeeamONE.Reporter.Server.x64.log" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VO_REPORTER_SERVICE_ACCOUNT_NAME="{{ one_username }}" VO_REPORTER_SERVICE_ACCOUNT_PASSWORD="{{ one_password }}" VO_REPORTER_SQL_SERVER_NAME="{{ sql_instance }}" VO_REPORTER_DATABASE_NAME="{{ sql_database }}" VO_REPORTER_AUTHENTICATION_TYPE_NAME=0 VO_REPORTER_SQL_USER_NAME="{{ one_username }}" VO_REPORTER_SQL_PASSWORD="{{ one_password }}" VO_INSTALLATION_TYPE="{{ one_installation_type }}"'
+    arguments: '/L*v "{{ destination }}logs\VeeamONE.Reporter.Server.x64.log" ACCEPT_THIRDPARTY_LICENSES=1 ACCEPT_EULA=1 VO_REPORTER_SERVICE_ACCOUNT_NAME="{{ one_username }}" VO_REPORTER_SERVICE_ACCOUNT_PASSWORD="{{ one_password }}" VO_REPORTER_SQL_SERVER_NAME="{{ sql_instance }}" VO_REPORTER_DATABASE_NAME="{{ sql_database }}" VO_REPORTER_AUTHENTICATION_TYPE_NAME=0 VO_REPORTER_SQL_USER_NAME="{{ sql_username }}" VO_REPORTER_SQL_PASSWORD="{{ sql_password }}" VO_INSTALLATION_TYPE="{{ one_installation_type }}"'
   become: yes
   become_flags: logon_type=batch
   vars:
