@@ -6,7 +6,12 @@
     product_id: Install .NET Framework
     state: present
     arguments: '/q /norestart'
+    expected_return_code:
+      - 0
+      - 3010
+      - 16389
   register: software
+  changed_when: software.rc != 16389
 - name: Rebooting server to complete .NET Framework installation
   ansible.windows.win_reboot:
     msg: Reboot initiated by Ansible to complete .NET Framework installation
